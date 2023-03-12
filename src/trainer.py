@@ -50,9 +50,9 @@ from transformers.integrations import (
     run_hp_search_optuna,
     run_hp_search_ray,
 )
-from transformers.modeling_auto import MODEL_FOR_QUESTION_ANSWERING_MAPPING
+from transformers.models.auto.modeling_auto import MODEL_FOR_QUESTION_ANSWERING_MAPPING
 from transformers.modeling_utils import PreTrainedModel
-from transformers.optimization import AdamW, get_linear_schedule_with_warmup
+from transformers.optimization import AdamW, get_linear_schedule_with_warmup, get_constant_schedule_with_warmup
 from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 from transformers.trainer_callback import (
     CallbackHandler,
@@ -64,7 +64,6 @@ from transformers.trainer_callback import (
     TrainerState,
 )
 from transformers.trainer_pt_utils import (
-    DistributedTensorGatherer,
     SequentialDistributedSampler,
     distributed_broadcast_scalars,
     distributed_concat,
@@ -74,6 +73,7 @@ from transformers.trainer_pt_utils import (
     nested_numpify,
     nested_xla_mesh_reduce,
     reissue_pt_warnings,
+    DistributedTensorGatherer,
 )
 from transformers.trainer_utils import (
     PREFIX_CHECKPOINT_DIR,
@@ -168,6 +168,8 @@ def default_dev_objective(metrics):
         return metrics["eval_pearson"]
     elif "eval_acc" in metrics:
         return metrics["eval_acc"]
+    elif "eval_accuracy" in metrics:
+        return metrics["eval_accuracy"]
  
     raise Exception("No metric founded for {}".format(metrics))
 
@@ -224,6 +226,9 @@ class Trainer(transformers.Trainer):
             self.lr_scheduler = get_linear_schedule_with_warmup(
                 self.optimizer, num_warmup_steps=self.args.warmup_steps, num_training_steps=num_training_steps
             )
+            # self.lr_scheduler = get_constant_schedule_with_warmup(
+            #     self.optimizer, num_warmup_steps=self.args.warmup_steps
+            # )
 
     def train(self, model_path=None, dev_objective=None):
         """
@@ -329,7 +334,7 @@ class Trainer(transformers.Trainer):
         logging_loss_scalar = 0.0
         model.zero_grad()
         train_iterator = trange(
-            epochs_trained, int(num_train_epochs), desc="Epoch", disable=not self.is_local_master()
+            epochs_trained, int(num_train_epochs), desc="Epoch", disable=not self.args.local_rank in [-1, 0]
         )
         for epoch in train_iterator:
             if isinstance(train_dataloader, DataLoader) and isinstance(train_dataloader.sampler, DistributedSampler):
@@ -395,9 +400,23 @@ class Trainer(transformers.Trainer):
                             if version.parse(torch.__version__) >= version.parse("1.4")
                             else scheduler.get_lr()[0]
                         )
+                        logs["lr_lambdas"] = (
+                            scheduler.state_dict()['lr_lambdas']
+                        )
+
+                        ## add steps logging
+                        self.state.global_step = self.global_step
+                        # logs['step'] = self.global_step
                         logging_loss_scalar = tr_loss_scalar
 
                         self.log(logs)
+                        output_log = os.path.join(
+                            self.args.output_dir, f"LOG_train.txt"
+                        )
+                        with open(output_log, "a") as writer:
+                            loss, norm, learning_rate, step = logs['loss'], logs['norm'], logs['learning_rate'], self.global_step
+                            writer.write("step {}: loss: {:.6f} | norm: {:.4f} | learning_rate: {:.2e}\n"
+                                    .format(step, loss, norm, learning_rate))
 
                     # ----------------------------------------------------------------------
                     # BEGIN CHANGES.
@@ -406,6 +425,8 @@ class Trainer(transformers.Trainer):
                     metrics = None
                     if self.args.evaluate_during_training and self.global_step % self.args.eval_steps == 0:
                         output = self.evaluate()
+                        # print("----------------------output:", output)
+                        # print("----------------------output.metrics:", output.metrics)
                         metrics = output.metrics
                         objective = self.dev_objective(metrics)
                         if objective > self.objective:
@@ -433,7 +454,7 @@ class Trainer(transformers.Trainer):
             delattr(self, "_past")
 
         logger.info("\n\nTraining completed. Do not forget to share your model on huggingface.co/models =)\n\n")
-        return TrainOutput(self.global_step, tr_loss / self.global_step), self.objective
+        return TrainOutput(self.global_step, tr_loss / self.global_step, self.compute_metrics), self.objective
 
 
     """
@@ -462,12 +483,30 @@ class Trainer(transformers.Trainer):
 
         eval_dataloader = self.get_eval_dataloader(eval_dataset)
 
-        output = self.prediction_loop(eval_dataloader, description="Evaluation")
+        # output = self.prediction_loop(eval_dataloader, description="Evaluation")
+        output = self.evaluation_loop(eval_dataloader, description="Evaluation")
+        # print("============-------+++++++++++++++++++++++++++++++++++++++++++++++++", output.metrics)
 
         self.log(output.metrics)
+        output_log = os.path.join(
+                self.args.output_dir, f"LOG_train.txt"
+            )
+        with open(output_log, "a") as writer:
+            eval_loss, eval_accuracy = output.metrics['eval_loss'], output.metrics['eval_accuracy']
+            step = self.global_step
+            writer.write("evaluation at step {}: eval_loss: {:.4f} | eval_accuracy: {:.4f} \n"
+                    .format(step, eval_loss, eval_accuracy))
 
         if self.args.tpu_metrics_debug or self.args.debug:
             # tpu-comment: Logging debug metrics for PyTorch/XLA (compile, execute times, ops, etc.)
             xm.master_print(met.metrics_report())
 
         return output
+    
+    def is_world_master(self) -> bool:
+        """
+        This will be True only in one process, even in distributed mode,
+        even when training on multiple machines.
+        """
+        
+        return self.args.local_rank == -1 or torch.distributed.get_rank() == 0

@@ -14,7 +14,8 @@ import transformers
 from transformers.data.processors.utils import InputFeatures
 from transformers import DataProcessor, InputExample
 from transformers.data.processors.glue import *
-from transformers.data.metrics import glue_compute_metrics
+# from transformers.data.metrics import glue_compute_metrics
+import evaluate
 import dataclasses
 from dataclasses import dataclass, asdict
 from typing import List, Optional, Union
@@ -596,6 +597,26 @@ output_modes_mapping = {
 }
 
 # Return a function that takes (task_name, preds, labels) as inputs
+## map our name to glue tasks names that can be recoginized by huggingface
+    # ["sst2", "mnli", "mnli_mismatched", "mnli_matched", 
+    # "cola", "stsb", "mrpc", "qqp", "qnli", "rte", "wnli", "hans"]
+name_mapping = {
+    "cola": "cola",
+    "mnli": "mnli",
+    "mnli-mm": "mnli_mismatched",
+    "mrpc": "mrpc",
+    "sst-2": "sst2",
+    "sts-b": "stsb",
+    "qqp": "qqp",
+    "qnli": "qnli",
+    "rte": "rte",
+    "wnli": "wnli",
+}
+def glue_compute_metrics(task_name, preds, labels):
+    task_name = name_mapping[task_name]
+    metric = evaluate.load("glue", task_name)
+    return metric.compute(predictions = preds, references = labels)
+
 compute_metrics_mapping = {
     "cola": glue_compute_metrics,
     "mnli": glue_compute_metrics,

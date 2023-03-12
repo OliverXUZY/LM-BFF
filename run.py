@@ -207,10 +207,10 @@ class DynamicDataTrainingArguments(DataTrainingArguments):
         default=False,
         metadata={"help": "Whether to use prompt-based fine-tuning"}
     )
-    template_list: list = field(
-        default=None,
-        metadata={"help": "(DO NOT List of templates (only initialized after the program starts."}
-    )
+    # template_list: list = field(
+    #     default=None,
+    #     metadata={"help": "(DO NOT List of templates (only initialized after the program starts."}
+    # )
 
 
 @dataclass
@@ -258,6 +258,11 @@ class DynamicTrainingArguments(TrainingArguments):
         metadata={"help": "No test"}
     )
 
+    evaluate_during_training: bool = field(
+    default=False,
+    metadata={"help": "whether evaluate during training."}
+    )
+
 
 def main():
     parser = HfArgumentParser((ModelArguments, DynamicDataTrainingArguments, DynamicTrainingArguments))
@@ -268,6 +273,8 @@ def main():
         model_args, data_args, training_args = parser.parse_json_file(json_file=os.path.abspath(sys.argv[1]))
     else:
         model_args, data_args, training_args = parser.parse_args_into_dataclasses()
+
+    data_args.template_list = None # not use any pre-loaded template for now
 
     if 'prompt' in model_args.few_shot_type:
         data_args.prompt = True
@@ -327,6 +334,7 @@ def main():
 
                 data_args.mapping = mapping_list[data_args.mapping_id]
                 logger.info("Specify using the %d-th mapping: %s" % (data_args.mapping_id, data_args.mapping))
+    # not useful right now
 
     # Check save path
     if (
@@ -345,7 +353,8 @@ def main():
         bool(training_args.local_rank != -1),
         training_args.fp16,
     )
-    logger.info("Training/evaluation parameters %s", training_args)
+
+    # logger.info("Training/evaluation parameters %s", training_args)
 
     # Set seed
     set_seed(training_args.seed)
@@ -423,6 +432,7 @@ def main():
                     new_template = new_template + sub_template
                 logger.info("| {} => {}".format(data_args.template, new_template))
                 data_args.template = new_template
+    # not useful right now
 
     # Create config
     config = AutoConfig.from_pretrained(
@@ -431,6 +441,8 @@ def main():
         finetuning_task=data_args.task_name,
         cache_dir=model_args.cache_dir,
     )
+
+    logger.info(config.model_type)
 
     if 'prompt' in model_args.few_shot_type:
         if config.model_type == 'roberta':
@@ -467,6 +479,9 @@ def main():
         else None
     )
 
+    # logger.info("len of datasets: train: {}, eval: {}".format(len(train_dataset), len(eval_dataset)))
+    logger.info("======================================================= Done Loading Dataset ========================================================")
+
     set_seed(training_args.seed)
 
     model = model_fn.from_pretrained(
@@ -490,6 +505,9 @@ def main():
     model.model_args = model_args
     model.data_args = data_args
     model.tokenizer = tokenizer
+
+    logger.info("======================================================= Done Loading Model ========================================================")
+
 
     # Build metric
     def build_compute_metrics_fn(task_name: str) -> Callable[[EvalPrediction], Dict]:
@@ -516,7 +534,7 @@ def main():
             return compute_metrics_mapping[task_name](task_name, preds, label_ids)
 
         return compute_metrics_fn
-    
+
     # Initialize our Trainer
     trainer = Trainer(
         model=model,
@@ -526,18 +544,23 @@ def main():
         compute_metrics=build_compute_metrics_fn(data_args.task_name)
     )
 
-    # Training
+    logger.info("======================================================= Done Contructing Trainer ========================================================")
+    train_dataloader = trainer.get_train_dataloader()
+    logger.info("length of dataloader: {}".format(len(train_dataloader)))
+    logger.info("batchsize of train dataloader: {}".format(train_dataloader.batch_size))
+
     if training_args.do_train:
         trainer.train(model_path=model_args.model_name_or_path if os.path.isdir(model_args.model_name_or_path) else None)
         # Use the early stop, so do not save the model in the end (unless specify save_at_last)
         if training_args.save_at_last:
             trainer.save_model(training_args.output_dir)
- 
         if trainer.is_world_master():
             tokenizer.save_pretrained(training_args.output_dir)
             torch.save(model_args, os.path.join(training_args.output_dir, "model_args.bin"))
             torch.save(data_args, os.path.join(training_args.output_dir, "data_args.bin"))
-        
+
+        logger.info("======================================================= Done Training ========================================================")
+
         # Reload the best checkpoint (for eval)
         model = model_fn.from_pretrained(training_args.output_dir)
         model = model.to(training_args.device)
@@ -550,7 +573,8 @@ def main():
         model.model_args = model_args
         model.data_args = data_args
         model.tokenizer = tokenizer
-
+    
+    logger.info("======================================================= start evaluation ========================================================")
     # Evaluation
     final_result = {
         'time': str(datetime.today()),
@@ -578,6 +602,8 @@ def main():
                         writer.write("%s = %s\n" % (key, value))
                         final_result[eval_dataset.args.task_name + '_dev_' + key] = value
             eval_results.update(eval_result)
+    
+    logger.info("======================================================= Start prediction ========================================================")
 
     test_results = {}
     if training_args.do_predict:
@@ -622,6 +648,28 @@ def main():
                 final_result.pop('evaluation_strategy')
             f.write(str(final_result) + '\n')
     
+    # for obj in trainer.state.log_history:
+    #     print(obj)
+    
+    output_train_file = os.path.join(
+                training_args.output_dir, f"train_logs_{train_dataset.args.task_name}.txt"
+            )
+    with open(output_train_file, "w") as writer:
+        logger.info("***** logging train results {} *****".format(train_dataset.args.task_name))
+        for obj in trainer.state.log_history:
+            # print("this is obj", obj)
+            if len(obj.keys()) == 5:
+                # training configs:
+                # print("train---",obj)
+                loss, norm, learning_rate, _, step = obj.values()
+                writer.write("step {}: loss: {:.6f} | norm: {:.4f} | learning_rate: {:.2e}\n"
+                        .format(step, loss, norm, learning_rate))
+            else:
+                # print("eva----", obj)
+                eval_loss, eval_accuracy, step = obj.values()
+                writer.write("evaluation at step {}: eval_loss: {:.4f} | eval_accuracy: {:.4f} \n"
+                        .format(step, eval_loss, eval_accuracy))
+
     return eval_results
 
 if __name__ == "__main__":

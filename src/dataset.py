@@ -174,7 +174,7 @@ def tokenize_multipart_input(
                 part = part.replace('_', ' ') 
                 # handle special case when T5 tokenizer might add an extra space
                 if len(part) == 1:
-                    new_tokens.append(tokenizer._convert_token_to_id(part))
+                    new_tokens.append(tokenizer.convert_tokens_to_ids(part))
                 else:
                     new_tokens += enc(part)
 
@@ -245,7 +245,7 @@ def tokenize_multipart_input(
         assert mask_pos[0] < max_length
 
     result = {'input_ids': input_ids, 'attention_mask': attention_mask}
-    if 'BERT' in type(tokenizer).__name__:
+    if 'BertTokenizer' in type(tokenizer).__name__:
         # Only provide token type ids for BERT
         result['token_type_ids'] = token_type_ids
 
@@ -284,9 +284,9 @@ class FewShotDataset(torch.utils.data.Dataset):
                 if self.label_to_word[key][0] not in ['<', '[', '.', ',']:
                     # Make sure space+word is in the vocabulary
                     assert len(tokenizer.tokenize(' ' + self.label_to_word[key])) == 1
-                    self.label_to_word[key] = tokenizer._convert_token_to_id(tokenizer.tokenize(' ' + self.label_to_word[key])[0])
+                    self.label_to_word[key] = tokenizer.convert_tokens_to_ids(tokenizer.tokenize(' ' + self.label_to_word[key])[0])
                 else:
-                    self.label_to_word[key] = tokenizer._convert_token_to_id(self.label_to_word[key])
+                    self.label_to_word[key] = tokenizer.convert_tokens_to_ids(self.label_to_word[key])
                 logger.info("Label {} to word {} ({})".format(key, tokenizer._convert_id_to_token(self.label_to_word[key]), self.label_to_word[key]))
             
             if len(self.label_list) > 1:
@@ -385,7 +385,7 @@ class FewShotDataset(torch.utils.data.Dataset):
 
             assert len(self.support_emb) == len(self.support_examples)
             assert len(self.query_emb) == len(self.query_examples)
- 
+
         # Size is expanded by num_sample
         self.size = len(self.query_examples) * self.num_sample
         
@@ -437,6 +437,7 @@ class FewShotDataset(torch.utils.data.Dataset):
 
                 # We'll subsample context_indices further later.
                 self.example_idx.append((query_idx, context_indices, sample_idx))
+
 
         # If it is not training, we pre-process the data; otherwise, we process the data online.
         if mode != "train":
