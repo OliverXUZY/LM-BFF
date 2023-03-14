@@ -28,9 +28,9 @@ The accuracy for each epoch is averaged cross all batches.
 <!-- 100,10 for testing -->
 BackBone: **RoBERTa-large**
 (paper's result in parenthesis)
-|test dataset |Prompt-based zero-shot|Prompt-based FT      |Multi-task FT + PB-FT|
-|-------------|-----|---------------------|--------|
-|SST-2        |83.60(83.6)| 93.23 (92.7 +- 0.9) | 93.81 |
-|RTE          |51.26(51.3)| 71.84 (69.1 +- 3.6) | 74.01 |
-|MRPC         |61.88(61.9)| 78.53 (74.5 +- 5.3) | 81.60 |
-|QNLI         |50.81(50.8)| 69.85 (64.5 +- 4.2) | 69.92 |
+|test dataset |Prompt-based zero-shot|Multi-task FT + zero-shot|Prompt-based FT|Multi-task FT + PB-FT|
+|-------------|----------------------|-------------------------|---------------|--------|
+|SST-2        |83.60(83.6)|-| 93.23 (92.7 +- 0.9) | 93.81 |
+|RTE          |51.26(51.3)|-| 71.84 (69.1 +- 3.6) | 74.01 |
+|MRPC         |61.88(61.9)|81.60| 78.53 (74.5 +- 5.3) | 81.60 |
+|QNLI         |50.81(50.8)|-| 69.85 (64.5 +- 4.2) | 69.92 |
