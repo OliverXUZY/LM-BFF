@@ -29,7 +29,7 @@ The accuracy for each epoch is averaged cross all batches.
 ### Result
 <!-- 100,10 for testing -->
 BackBone: **RoBERTa-large**
-(paper's result in parenthesis)
+([paper's result](https://arxiv.org/pdf/2012.15723.pdf) in parenthesis)
 |test dataset |Prompt-based zero-shot|Multi-task FT + zero-shot|Prompt-based FT|Multi-task FT + PB-FT|
 |-------------|----------------------|-------------------------|---------------|--------|
 |SST-2        |83.60(83.6)|92.89| 93.23 (92.7 +- 0.9) | 93.81 |
