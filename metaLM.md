@@ -36,3 +36,42 @@ BackBone: **RoBERTa-large**
 |RTE          |51.26(51.3)|74.0072| 71.84 (69.1 +- 3.6) | 74.01 |
 |MRPC         |61.88(61.9)|81.5873| 78.53 (74.5 +- 5.3) | 81.5972 |
 |QNLI         |50.81(50.8)|65.84| 69.85 (64.5 +- 4.2) | 69.92 |
+
+
+### Examples
+* Multi-tasks finetune backbone
+```
+TEST_TASK=mrpc
+MODEL=roberta-large
+
+NUM_BATCH=1000
+
+CUDA_VISIBLE_DEVICES=1  \
+python metaTrain.py \
+    --model_name_or_path $MODEL \
+    --task_name $TEST_TASK \
+    --few_shot_type prompt \
+    --num_k 16 \
+    --num_train_epochs 10.0 \
+    --num_batch $NUM_BATCH \
+    --logging_steps 50\
+    --per_device_train_batch_size 1 \
+    --max_seq_length 128 \
+    --gradient_accumulation_steps 10 \
+    --learning_rate 1e-5 \
+    --output_dir result/meta-$TEST_TASK-$MODEL \
+    --seed 42 \
+    --overwrite_output_dir \
+    --do_train \
+    --save_at_last \
+```
+
+* zero-shot evaluation
+```
+CUDA_VISIBLE_DEVICES=0 TAG=exp TYPE=prompt TASK=RTE BS=2 LR=1e-5 SEED=42  MODEL=result/meta-rte-roberta-large bash run_experiment.sh "--no_train"
+```
+
+* Prompt-finetune + evaluation
+```
+CUDA_VISIBLE_DEVICES=0 TAG=exp TYPE=prompt TASK=RTE BS=2 LR=1e-5 SEED=42  MODEL=result/meta-rte-roberta-large bash run_experiment.sh 
+```
