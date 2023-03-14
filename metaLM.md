@@ -12,7 +12,6 @@ GLUE like datasets, we use the same dataset, excluding the STS-B (regression dat
         - Sample 10 subdataset, sample 1 example from each subdatasets.
         - Forward mini-batch (10 samples) into Masked LM.
         - Prompt-based finetuning: Compute loss on the masked token, backward gradient. 
-        - Compute accuracy and save.
 
 The evaluation is predicting the masked token. We do not learn linear head here. There are in total $n\\_epoch \times n\\_batch$ optimization steps.
 Optimization details:
