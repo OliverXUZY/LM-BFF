@@ -2,9 +2,11 @@
 
 ### Datasets
 GLUE like datasets, we use the same dataset, excluding the STS-B (regression dataset): 
-- train dataset: cola, sst2, qqp, mnli, qnli, rte, wnli, snli, 
+- train dataset: cola, sst2, qqp, mnli, qnli, rte, snli, 
             trec, mpqa, cr, sst5, mr, subj, mrpc. The datasets contains binary classes or multi-classes.
-            
+
+For testing on certain dataset (say qnli), we use all other 13 datasets as training data for multi-tasks finetuning.
+
 ### Algorithms:
 1. Sub-sample $K=16$ samples per class from each datasets. Form subdatasets.
 2. For epoch = 1, ..., $n\\_epoch = 10$
