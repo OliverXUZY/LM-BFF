@@ -36,6 +36,8 @@ class OurInputFeatures(InputFeatures):
     mask_pos: Optional[List[int]] = None # Position of the mask token
     label_word_list: Optional[List[int]] = None # Label word mapping (dynamic)
 
+    task_id: Optional[List[int]] = None # added by Zhuoyan, to track which dataset this sample belongs to
+
     def to_json_string(self):
         """Serializes this instance to a JSON string."""
         return json.dumps(dataclasses.asdict(self)) + "\n"
@@ -61,7 +63,6 @@ def tokenize_multipart_input(
     input_text_list, 
     max_length, 
     tokenizer, 
-    task_name=None, 
     prompt=False, 
     template=None,
     label_word_list=None, 
@@ -577,7 +578,6 @@ class FewShotDataset(torch.utils.data.Dataset):
                 input_text_list=input_example_to_tuple(example),
                 max_length=max_length,
                 tokenizer=self.tokenizer,
-                task_name=self.args.task_name,
                 prompt=prompt,
                 template=template,
                 label_word_list=label_word_list,
@@ -636,7 +636,6 @@ class FewShotDataset(torch.utils.data.Dataset):
                 input_text_list=augmented_example,
                 max_length=max_length,
                 tokenizer=self.tokenizer,
-                task_name=self.args.task_name,
                 prompt=prompt,
                 template=template,
                 label_word_list=label_word_list,

@@ -79,7 +79,7 @@ case $TASK in
         TASK_EXTRA="--first_sent_limit 110 --other_sent_limit 50 --double_demo"
         ;;
     trec)
-        TEMPLATE="*cls**mask*:*+sent_0**sep+*"
+        TEMPLATE=*cls**mask*:*+sent_0**sep+*
         MAPPING="{0:'Description',1:'Entity',2:'Expression',3:'Human',4:'Location',5:'Number'}"
         TASK_EXTRA="--first_sent_limit 110 --double_demo"
         ;;
@@ -134,8 +134,7 @@ python run.py \
   --mapping $MAPPING \
   $TASK_EXTRA \
   $1 
-
 # Delete the checkpoint 
 # Since we need to run multiple trials, saving all the checkpoints takes 
 # a lot of storage space. You can find all evaluation results in `log` file anyway.
-# rm -r result/$TASK-$TYPE-$K-$SEED-$MODEL-$TRIAL_IDTF \
+rm -r result/$TASK-$TYPE-$K-$SEED-$MODEL-$TRIAL_IDTF \

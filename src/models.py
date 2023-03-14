@@ -57,6 +57,7 @@ class BertForPromptFinetuning(BertPreTrainedModel):
         token_type_ids=None,
         mask_pos=None,
         labels=None,
+        task_id = None,
     ):
         batch_size = input_ids.size(0)
 
@@ -141,6 +142,7 @@ class RobertaForPromptFinetuning(BertPreTrainedModel):
         attention_mask=None,
         mask_pos=None,
         labels=None,
+        task_id = None, ## added by zhuoyan to coincide with we add one more key task_id to batch
     ):
         batch_size = input_ids.size(0)
 

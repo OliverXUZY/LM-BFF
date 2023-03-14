@@ -91,6 +91,8 @@ from transformers.utils import logging
 
 from tqdm import tqdm, trange
 
+from src.metaDataset import task_name_to_id
+
 _use_native_amp = False
 _use_apex = False
 
@@ -359,6 +361,18 @@ class Trainer(transformers.Trainer):
                     steps_trained_in_current_epoch -= 1
                     continue
 
+                # ----------------------------------------------------------------------
+                # BEGIN zhuoyan CHANGES. modify label_word_list accordingly
+                # ----------------------------------------------------------------------
+                if inputs.get('task_id'): ## got batch from metaDataset:
+                    task_id_to_name = list(task_name_to_id.keys())
+                    task_name = task_id_to_name[inputs['task_id'].item()]
+                    model.label_word_list = train_dataloader.dataset.datasets[task_name]['label_word_list']
+                # ----------------------------------------------------------------------
+                # END zhuoyan CHANGES. modify label_word_list accordingly
+                # ----------------------------------------------------------------------
+
+
                 tr_loss += self.training_step(model, inputs)
 
                 if (step + 1) % self.args.gradient_accumulation_steps == 0 or (
@@ -400,6 +414,10 @@ class Trainer(transformers.Trainer):
                             if version.parse(torch.__version__) >= version.parse("1.4")
                             else scheduler.get_lr()[0]
                         )
+
+                        # ----------------------------------------------------------------------
+                        # BEGIN zhuoyan CHANGES.
+                        # ----------------------------------------------------------------------
                         logs["lr_lambdas"] = (
                             scheduler.state_dict()['lr_lambdas']
                         )
@@ -417,6 +435,10 @@ class Trainer(transformers.Trainer):
                             loss, norm, learning_rate, step = logs['loss'], logs['norm'], logs['learning_rate'], self.global_step
                             writer.write("step {}: loss: {:.6f} | norm: {:.4f} | learning_rate: {:.2e}\n"
                                     .format(step, loss, norm, learning_rate))
+
+                        # ----------------------------------------------------------------------
+                        # END CHANGES.
+                        # ----------------------------------------------------------------------
 
                     # ----------------------------------------------------------------------
                     # BEGIN CHANGES.
@@ -493,7 +515,7 @@ class Trainer(transformers.Trainer):
             )
         with open(output_log, "a") as writer:
             eval_loss, eval_accuracy = output.metrics['eval_loss'], output.metrics['eval_accuracy']
-            step = self.global_step
+            step = self.global_step if 'global_step' in vars(self) else  0
             writer.write("evaluation at step {}: eval_loss: {:.4f} | eval_accuracy: {:.4f} \n"
                     .format(step, eval_loss, eval_accuracy))
 
