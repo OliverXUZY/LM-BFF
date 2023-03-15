@@ -39,11 +39,12 @@ BackBone: **RoBERTa-large**
 
 
 ### Examples
-* Multi-tasks finetune backbone
+The current running performs prompt-based finetuning without demonstration.
+* Multi-tasks finetune backbone ```roberta-large```, select one task ```rte``` as test dataset, other tasks as training data. Save model in ```result/meta-rte-roberta-large ```.
 ```
-TEST_TASK=mrpc
+TEST_TASK=rte
 MODEL=roberta-large
-
+SEED=42
 NUM_BATCH=1000
 
 CUDA_VISIBLE_DEVICES=1  \
@@ -54,24 +55,28 @@ python metaTrain.py \
     --num_k 16 \
     --num_train_epochs 10.0 \
     --num_batch $NUM_BATCH \
-    --logging_steps 50\
+    --logging_steps 50 \
     --per_device_train_batch_size 1 \
     --max_seq_length 128 \
     --gradient_accumulation_steps 10 \
     --learning_rate 1e-5 \
     --output_dir result/meta-$TEST_TASK-$MODEL \
-    --seed 42 \
+    --seed $SEED \
     --overwrite_output_dir \
     --do_train \
     --save_at_last \
 ```
 
-* zero-shot evaluation
+* zero-shot evaluation on
+   - Original backbone (replicates paper's result): ```MODEL=roberta-large```
+   - Multi-tasks trained backbone: ```MODEL=result/meta-rte-roberta-large```
 ```
 CUDA_VISIBLE_DEVICES=0 TAG=exp TYPE=prompt TASK=RTE BS=2 LR=1e-5 SEED=42  MODEL=result/meta-rte-roberta-large bash run_experiment.sh "--no_train"
 ```
 
 * Prompt-finetune + evaluation
+  - Original backbone (replicates paper's result): ```MODEL=roberta-large```
+  - Multi-tasks trained backbone: ```MODEL=result/meta-rte-roberta-large```
 ```
 CUDA_VISIBLE_DEVICES=0 TAG=exp TYPE=prompt TASK=RTE BS=2 LR=1e-5 SEED=42  MODEL=result/meta-rte-roberta-large bash run_experiment.sh 
 ```
