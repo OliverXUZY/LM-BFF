@@ -99,6 +99,15 @@ class DynamicDataTrainingArguments:
         },
     )
 
+    data_seed: int = field(
+        default=42,
+        metadata={
+            "help": (
+                "which part of data was used for training, one of [13,21,42,87,100]"
+            )
+        },
+    )
+
     # ----------------------------------------------------------------------
     # END CHANGES.
     # ----------------------------------------------------------------------
