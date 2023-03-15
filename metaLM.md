@@ -39,6 +39,8 @@ BackBone: **RoBERTa-large**
 
 
 ### Examples
+Please install the requirements and download data following `README.md`. This result used transformers version `4.26.1`(or stable version). The reason we use new version instead of `3.4.0` in paper is old version requires python 3.4 and invoke many decrecated functions and classes, this will produce many warnings. It would easier to debug also.
+
 The current running performs prompt-based finetuning without demonstration.
 * Multi-tasks finetune backbone ```roberta-large```, select one task ```rte``` as test dataset, other tasks as training data. Save model in ```result/meta-rte-roberta-large ```.
 ```
