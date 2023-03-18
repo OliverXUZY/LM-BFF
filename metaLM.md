@@ -36,9 +36,10 @@ BackBone: **RoBERTa-large**
 |RTE          |51.26(51.3)|74.0072| 67.8 +- 2.7 (69.1 +- 3.6) |  73.0 +- 2.0 |
 |MRPC         |61.88(61.9)|81.5873| 71.4 +- 7.9 (74.5 +- 5.3) | 77.1 +- 3.7 |
 |QNLI         |50.81(50.8)|65.84  | 69.4 +- 3.6 (64.5 +- 4.2) | 71.9 +- 1.6 |
-|QQP(F1)      |32.0(32.0) |63.43  |66.2 +- 4.9 (65.5 +- 5.3)|  |
-|TREC (Acc)   |47.72(49.7)|_34.6_ | 86.0 +- 3.0 (84.8 +- 5.1) | |
+|QQP(F1)      |32.0(32.0) |63.43  |66.2 +- 4.9 (65.5 +- 5.3)  |  68.7 +- 3.4 |
+|TREC (Acc)   |47.72(49.7)|_34.6_ | 86.0 +- 3.0 (84.8 +- 5.1) | _83.0 +- 4.1_ |
 
+The reason for TREC drop might because it contains 6 classes \[0-5\], where finetuned classes mostly binary classes.
 
 ### Examples
 Please install the requirements and download data following `README.md`. This result used transformers version `4.26.1`(or stable version). The reason we use new version instead of `3.4.0` in paper is old version requires python 3.4 and invoke many decrecated functions and classes, this will produce many warnings. It would easier to debug also.
