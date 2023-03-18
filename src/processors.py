@@ -532,8 +532,6 @@ class TextClassificationProcessor(DataProcessor):
 
         return examples
         
-def text_classification_metrics(task_name, preds, labels):
-    return {"acc": (preds == labels).mean()}
 
 # Add your task to the following mappings
 
@@ -617,6 +615,13 @@ def glue_compute_metrics(task_name, preds, labels):
     metric = evaluate.load("glue", task_name)
     return metric.compute(predictions = preds, references = labels)
 
+# def text_classification_metrics(task_name, preds, labels):
+#     return {"acc": (preds == labels).mean()}
+
+def text_classification_metrics(task_name, preds, labels):
+    metric = evaluate.load("accuracy")
+    return metric.compute(predictions = preds, references = labels)
+    
 compute_metrics_mapping = {
     "cola": glue_compute_metrics,
     "mnli": glue_compute_metrics,
