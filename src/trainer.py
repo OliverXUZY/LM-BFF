@@ -507,7 +507,7 @@ class Trainer(transformers.Trainer):
 
         # output = self.prediction_loop(eval_dataloader, description="Evaluation")
         output = self.evaluation_loop(eval_dataloader, description="Evaluation")
-        # print("============-------+++++++++++++++++++++++++++++++++++++++++++++++++", output.metrics)
+        print("============-------+++++++++++++++++++++++++++++++++++++++++++++++++", output.metrics)
 
         self.log(output.metrics)
         output_log = os.path.join(
