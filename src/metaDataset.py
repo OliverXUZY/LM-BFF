@@ -158,7 +158,7 @@ class metaDataset(torch.utils.data.Dataset):
 
             # Load cache
             direc = data_dir_dict.get(name) or name
-            data_dir = "data/k-shot/{}/16-{}".format(direc, args.data_seed)
+            data_dir = "data/k-shot/{}/16-{}".format(direc, args.few_shot_data_seed)
             # Cache name distinguishes mode, task name, tokenizer, and length. So if you change anything beyond these elements, make sure to clear your cache.
             cached_features_file = os.path.join(
                 data_dir,
