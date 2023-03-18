@@ -99,7 +99,7 @@ class DynamicDataTrainingArguments:
         },
     )
 
-    data_seed: int = field(
+    few_shot_data_seed: int = field(
         default=42,
         metadata={
             "help": (
