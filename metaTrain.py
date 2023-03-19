@@ -332,7 +332,7 @@ def main():
         datefmt="%m/%d/%Y %H:%M:%S",
         level=logging.INFO if training_args.local_rank in [-1, 0] else logging.WARN,
     )
-    print("++zhuoan+",training_args.num_train_epochs)
+    print("++zhuoyan+: num_train_epochs",training_args.num_train_epochs)
 
     # Check save path
     if (
