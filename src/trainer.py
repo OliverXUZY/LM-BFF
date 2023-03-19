@@ -513,11 +513,15 @@ class Trainer(transformers.Trainer):
         output_log = os.path.join(
                 self.args.output_dir, f"LOG_train.txt"
             )
+        step = self.global_step if 'global_step' in vars(self) else  0
+        log_str = "evaluation at step {} | ".format(step)
+        for k,v in  output.metrics.items():
+            log_str += "{}: {:.4f} | ".format(k,v)
         with open(output_log, "a") as writer:
-            eval_loss, eval_accuracy = output.metrics['eval_loss'], output.metrics['eval_accuracy']
-            step = self.global_step if 'global_step' in vars(self) else  0
-            writer.write("evaluation at step {}: eval_loss: {:.4f} | eval_accuracy: {:.4f} \n"
-                    .format(step, eval_loss, eval_accuracy))
+            writer.write("{}\n".format(log_str))
+            # eval_loss, eval_accuracy = output.metrics['eval_loss'], output.metrics['eval_accuracy']
+            # writer.write("evaluation at step {}: eval_loss: {:.4f} | eval_accuracy: {:.4f} \n"
+            #         .format(step, eval_loss, eval_accuracy))
 
         if self.args.tpu_metrics_debug or self.args.debug:
             # tpu-comment: Logging debug metrics for PyTorch/XLA (compile, execute times, ops, etc.)
