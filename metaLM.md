@@ -42,8 +42,9 @@ BackBone: **RoBERTa-large**
 | MR (Acc)    |      || 86.9 +- 1.7 (87.0 +- 1.2)|_86.6 (0.9)_ |
 | MPQA (Acc)  |67.6(61.6)     || | |
 | Subj (Acc)  |51.45(51.4)     || | |
-| MNLI (Acc)  |      || | |
-| SNLI (Acc)  |      || | |
+| MNLI (Acc)  |50.84(50.8)      || | |
+| MNLI-mm (Acc)|51.72(51.7)      || | |
+| SNLI (Acc)  | 49.51(49.5)     || | |
 | CoLA (Matt.)|      || | |
 | SST-5 (Acc) |35.0(35.0)      || | |
 
