@@ -463,7 +463,6 @@ def main():
         additional_special_tokens=special_tokens,
         cache_dir=model_args.cache_dir,
     )
-
     # Get our special datasets.
     train_dataset = (
         FewShotDataset(data_args, tokenizer=tokenizer, mode="train", use_demo=("demo" in model_args.few_shot_type))
@@ -611,7 +610,13 @@ def main():
         logging.info("*** Test ***")
         test_datasets = [test_dataset]
         if data_args.task_name == "mnli":
+            ## append mnli-mm test set to mnli test set
+            ## replace every argument but change task_name from mnli to mnli-mm
+            ## one thing need to be careful is we add data_args.template_list = None  manually in main() lin 277
+            ## template_list does not comes with data_args when initialize it
+            ## so we did again here, to coincide with line 277
             mnli_mm_data_args = dataclasses.replace(data_args, task_name="mnli-mm")
+            mnli_mm_data_args.template_list = None
             test_datasets.append(
                 FewShotDataset(mnli_mm_data_args, tokenizer=tokenizer, mode="test", use_demo=('demo' in model_args.few_shot_type))
             )
