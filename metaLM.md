@@ -38,6 +38,8 @@ BackBone: **RoBERTa-large**
 |QNLI         |50.81(50.8)|65.84  | 69.4 +- 3.6 (64.5 +- 4.2) | 71.9 +- 1.6 |
 |QQP(F1)      |32.0(32.0) |63.43  |66.2 +- 4.9 (65.5 +- 5.3)  |  68.7 +- 3.4 |
 |TREC (Acc)   |47.72(49.7)|_34.6_ | 86.0 +- 3.0 (84.8 +- 5.1) | _83.0 +- 4.1_ |
+| CR(Acc)     |      || 91.4 +- 0.9 (90.3 +- 1.0) | |
+| MR(Acc)     |      || 86.9 +- 1.7 (87.0 +- 1.2)| |
 
 The reason for TREC drop might because it contains 6 classes \[0-5\], where finetuned classes mostly binary classes.
 
