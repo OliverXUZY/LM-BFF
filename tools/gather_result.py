@@ -4,6 +4,18 @@ import numpy as np
 import torch
 from torch import device
 
+def parse_str_to_dict(d):
+    dictionary = dict()
+    # Removes curly braces and splits the pairs into a list
+    pairs = d.strip('{}').split(', ')
+    for i in pairs:
+        pair = i.split(': ')
+        if len(pair) < 2:
+            continue
+        # Other symbols from the key-value pair should be stripped.
+        dictionary[pair[0].strip('\'\'\"\"')] = pair[1].strip('\'\'\"\"')
+    return dictionary
+    
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--condition", type=str, help="A dictionary contains conditions that the experiment results need to fulfill (e.g., tag, task_name, few_shot_type)")
@@ -19,92 +31,92 @@ def main():
     condition = eval(args.condition)
 
     if len(args.key) == 0:
-        if condition['task_name'] == 'cola':
-            args.key = 'cola_dev_eval_mcc'
-            args.test_key = 'cola_test_eval_mcc'
-        elif condition['task_name'] == 'mrpc/acc':
-            args.key = 'mrpc_dev_eval_acc'
-            args.test_key = 'mrpc_test_eval_acc'
-            args.test_key2 = 'mrpc_test_eval_f1'
-            condition['task_name'] = 'mrpc'
-        elif condition['task_name'] == 'mrpc/f1':
-            args.key = 'mrpc_dev_eval_f1'
-            args.test_key2 = 'mrpc_test_eval_acc'
-            args.test_key = 'mrpc_test_eval_f1'
-            condition['task_name'] = 'mrpc'
-        elif condition['task_name'] == 'qqp/acc':
-            args.key = 'qqp_dev_eval_acc'
-            args.test_key = 'qqp_test_eval_acc'
-            args.test_key2 = 'qqp_test_eval_f1'
-            condition['task_name'] = 'qqp'
-        elif condition['task_name'] == 'qqp/f1':
-            args.key = 'qqp_dev_eval_f1'
-            args.test_key2 = 'qqp_test_eval_acc'
-            args.test_key = 'qqp_test_eval_f1'
-            condition['task_name'] = 'qqp'
-        elif condition['task_name'] == 'sts-b/pearson':
-            args.key = 'sts-b_dev_eval_pearson'
-            args.test_key = 'sts-b_test_eval_pearson'
-            args.test_key2 = 'sts-b_test_eval_spearmanr'
-            condition['task_name'] = 'sts-b'
-        elif condition['task_name'] == 'sts-b/spearmanr':
-            args.key = 'sts-b_dev_eval_spearmanr'
-            args.test_key2 = 'sts-b_test_eval_pearson'
-            args.test_key = 'sts-b_test_eval_spearmanr'
-            condition['task_name'] = 'sts-b'
-        elif condition['task_name'] == 'qnli':
-            args.key = 'qnli_dev_eval_acc'
-            args.test_key = 'qnli_test_eval_acc'
-        elif condition['task_name'] == 'sst-2':
-            args.key = 'sst-2_dev_eval_acc'
-            args.test_key = 'sst-2_test_eval_acc'
-        elif condition['task_name'] == 'snli':
-            args.key = 'snli_dev_eval_acc'
-            args.test_key = 'snli_test_eval_acc'
-        elif condition['task_name'] == 'mnli':
-            args.key = 'mnli_dev_eval_mnli/acc'
-            args.test_key = 'mnli_test_eval_mnli/acc'
-        elif condition['task_name'] == 'mnli-mm':
-            condition['task_name'] = 'mnli'
-            args.key = 'mnli_dev_eval_mnli/acc'
-            args.test_key = 'mnli-mm_test_eval_mnli-mm/acc'
-        elif condition['task_name'] == 'rte':
-            args.key = 'rte_dev_eval_acc'
-            args.test_key = 'rte_test_eval_acc'
-        elif condition['task_name'] == 'ag_news':
-            args.key = 'ag_news_dev_eval_acc'
-            args.test_key = 'ag_news_test_eval_acc'
-        elif condition['task_name'] == 'yahoo_answers':
-            args.key = 'yahoo_answers_dev_eval_acc'
-            args.test_key = 'yahoo_answers_test_eval_acc'
-        elif condition['task_name'] == 'yelp_review_full':
-            args.key = 'yelp_review_full_dev_eval_acc'
-            args.test_key = 'yelp_review_full_test_eval_acc'
-        elif condition['task_name'] == 'mr':
-            args.key = 'mr_dev_eval_acc'
-            args.test_key = 'mr_test_eval_acc'
-        elif condition['task_name'] == 'sst-5':
-            args.key = 'sst-5_dev_eval_acc'
-            args.test_key = 'sst-5_test_eval_acc'
-        elif condition['task_name'] == 'subj':
-            args.key = 'subj_dev_eval_acc'
-            args.test_key = 'subj_test_eval_acc'
-        elif condition['task_name'] == 'trec':
-            args.key = 'trec_dev_eval_acc'
-            args.test_key = 'trec_test_eval_acc'
-        elif condition['task_name'] == 'cr':
-            args.key = 'cr_dev_eval_acc'
-            args.test_key = 'cr_test_eval_acc'
-        elif condition['task_name'] == 'mpqa':
-            args.key = 'mpqa_dev_eval_acc'
-            args.test_key = 'mpqa_test_eval_acc'
-        else:
-            raise NotImplementedError
+            if condition['task_name'] == 'cola':
+                args.key = 'cola_dev_eval_matthews_correlation'
+                args.test_key = 'cola_test_eval_matthews_correlation'
+            elif condition['task_name'] == 'mrpc/acc':
+                args.key = 'mrpc_dev_eval_accuracy'
+                args.test_key = 'mrpc_test_eval_accuracy'
+                args.test_key2 = 'mrpc_test_eval_f1'
+                condition['task_name'] = 'mrpc'
+            elif condition['task_name'] == 'mrpc/f1':
+                args.key = 'mrpc_dev_eval_f1'
+                args.test_key2 = 'mrpc_test_eval_accuracy'
+                args.test_key = 'mrpc_test_eval_f1'
+                condition['task_name'] = 'mrpc'
+            elif condition['task_name'] == 'qqp/acc':
+                args.key = 'qqp_dev_eval_accuracy'
+                args.test_key = 'qqp_test_eval_accuracy'
+                args.test_key2 = 'qqp_test_eval_f1'
+                condition['task_name'] = 'qqp'
+            elif condition['task_name'] == 'qqp/f1':
+                args.key = 'qqp_dev_eval_f1'
+                args.test_key2 = 'qqp_test_eval_accuracy'
+                args.test_key = 'qqp_test_eval_f1'
+                condition['task_name'] = 'qqp'
+            elif condition['task_name'] == 'sts-b/pearson':
+                args.key = 'sts-b_dev_eval_pearson'
+                args.test_key = 'sts-b_test_eval_pearson'
+                args.test_key2 = 'sts-b_test_eval_spearmanr'
+                condition['task_name'] = 'sts-b'
+            elif condition['task_name'] == 'sts-b/spearmanr':
+                args.key = 'sts-b_dev_eval_spearmanr'
+                args.test_key2 = 'sts-b_test_eval_pearson'
+                args.test_key = 'sts-b_test_eval_spearmanr'
+                condition['task_name'] = 'sts-b'
+            elif condition['task_name'] == 'qnli':
+                args.key = 'qnli_dev_eval_accuracy'
+                args.test_key = 'qnli_test_eval_accuracy'
+            elif condition['task_name'] == 'sst-2':
+                args.key = 'sst-2_dev_eval_accuracy'
+                args.test_key = 'sst-2_test_eval_accuracy'
+            elif condition['task_name'] == 'snli':
+                args.key = 'snli_dev_eval_accuracy'
+                args.test_key = 'snli_test_eval_accuracy'
+            elif condition['task_name'] == 'mnli':
+                args.key = 'mnli_dev_eval_accuracy'
+                args.test_key = 'mnli_test_eval_accuracy'
+            elif condition['task_name'] == 'mnli-mm':
+                condition['task_name'] = 'mnli'
+                args.key = 'mnli_dev_eval_accuracy'
+                args.test_key = 'mnli-mm_test_eval_accuracy'
+            elif condition['task_name'] == 'rte':
+                args.key = 'rte_dev_eval_accuracy'
+                args.test_key = 'rte_test_eval_accuracy'
+            elif condition['task_name'] == 'ag_news':
+                args.key = 'ag_news_dev_eval_accuracy'
+                args.test_key = 'ag_news_test_eval_accuracy'
+            elif condition['task_name'] == 'yahoo_answers':
+                args.key = 'yahoo_answers_dev_eval_accuracy'
+                args.test_key = 'yahoo_answers_test_eval_accuracy'
+            elif condition['task_name'] == 'yelp_review_full':
+                args.key = 'yelp_review_full_dev_eval_accuracy'
+                args.test_key = 'yelp_review_full_test_eval_accuracy'
+            elif condition['task_name'] == 'mr':
+                args.key = 'mr_dev_eval_accuracy'
+                args.test_key = 'mr_test_eval_accuracy'
+            elif condition['task_name'] == 'sst-5':
+                args.key = 'sst-5_dev_eval_accuracy'
+                args.test_key = 'sst-5_test_eval_accuracy'
+            elif condition['task_name'] == 'subj':
+                args.key = 'subj_dev_eval_accuracy'
+                args.test_key = 'subj_test_eval_accuracy'
+            elif condition['task_name'] == 'trec':
+                args.key = 'trec_dev_eval_accuracy'
+                args.test_key = 'trec_test_eval_accuracy'
+            elif condition['task_name'] == 'cr':
+                args.key = 'cr_dev_eval_accuracy'
+                args.test_key = 'cr_test_eval_accuracy'
+            elif condition['task_name'] == 'mpqa':
+                args.key = 'mpqa_dev_eval_accuracy'
+                args.test_key = 'mpqa_test_eval_accuracy'
+            else:
+                raise NotImplementedError
 
     with open(args.log) as f:
         result_list = []
         for line in f:
-            result_list.append(eval(line))
+            result_list.append(parse_str_to_dict(line))
     
     seed_result = {}
     seed_best = {}
@@ -139,11 +151,11 @@ def main():
         final_result_test[i] = seed_best[seed][args.test_key]
         if len(args.test_key2) > 0:
             final_result_test2[i] = seed_best[seed][args.test_key2]
-        print("%s: best dev (%.5f) test (%.5f) %s | total trials: %d" % (
+        print("{}: best dev ({:.5f}) test ({:.5f}) {} | total trials: {}".format(
             seed,
-            seed_best[seed][args.key],
-            seed_best[seed][args.test_key],
-            "test2 (%.5f)" % (seed_best[seed][args.test_key2]) if len(args.test_key2) > 0 else "",
+            float(seed_best[seed][args.key]),
+            float(seed_best[seed][args.test_key]),
+            "test2 ({})".format(seed_best[seed][args.test_key2]) if len(args.test_key2) > 0 else "",
             len(seed_result[seed])
         ))
         s = ''
