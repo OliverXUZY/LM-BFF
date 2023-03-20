@@ -172,6 +172,8 @@ def default_dev_objective(metrics):
         return metrics["eval_acc"]
     elif "eval_accuracy" in metrics:
         return metrics["eval_accuracy"]
+    elif "eval_matthews_correlation" in metrics:
+        return metrics["eval_matthews_correlation"]
  
     raise Exception("No metric founded for {}".format(metrics))
 
