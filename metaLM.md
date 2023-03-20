@@ -48,7 +48,6 @@ BackBone: **RoBERTa-large**
 |CoLA (Matt.) |2.03(2.0)   |__-0.065__ |8.6 +-5.8 (9.3 +- 7.3)| |
 |SST-5 (Acc)  |35.0(35.0)  |36.8     |48.1 +-1.6 (47.4 +- 2.5)| |
 
-The reason for TREC drop might because it contains 6 classes \[0-5\], where finetuned classes mostly binary classes.
 
 ### Examples
 Please install the requirements and download data following `README.md`. This result used transformers version `4.26.1`(or stable version). The reason we use new version instead of `3.4.0` in paper is old version requires python 3.4 and invoke many decrecated functions and classes, this will produce many warnings. It would easier to debug also.
