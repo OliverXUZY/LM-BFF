@@ -54,12 +54,40 @@ The reason for TREC drop might because it contains 6 classes \[0-5\], where fine
 Please install the requirements and download data following `README.md`. This result used transformers version `4.26.1`(or stable version). The reason we use new version instead of `3.4.0` in paper is old version requires python 3.4 and invoke many decrecated functions and classes, this will produce many warnings. It would easier to debug also.
 
 The current running performs prompt-based finetuning without demonstration.
-* Multi-tasks finetune backbone ```roberta-large```, select one task ```rte``` as test dataset, other tasks as training data. Save model in ```result/meta-rte-roberta-large ```.
+
+#### Zero-shot evaluation
+* zero-shot evaluation on
+   - Original backbone (replicates paper's result): ```MODEL=roberta-large```
+   - Multi-tasks trained backbone: ```MODEL=result/meta-rte-roberta-large```
+```
+CUDA_VISIBLE_DEVICES=0 TAG=exp TYPE=prompt TASK=RTE BS=2 LR=1e-5 SEED=42  MODEL=result/meta-rte-roberta-large bash run_experiment.sh "--no_train"
+```
+
+* Zero-shot evaluation for loop. choose `MODEL=roberta-large` or multitask-finetuned saved dir like below.
+```
+for test_task in MNLI SNLI CoLA
+do  
+    CUDA_VISIBLE_DEVICES=1 \
+    TAG=zero_shot \
+    TYPE=prompt \
+    TASK=$test_task \
+    BS=2 \
+    LR=1e-5 \
+    SEED=42 \
+    MODEL="result/meta-${test_task,,}-roberta-large" \
+    bash run_experiment.sh \
+    "--no_train"
+done
+```
+#### Multi-tasks finetune
+* Multi-tasks finetune backbone ```roberta-large```, select one task ```rte``` as test dataset, other tasks as training data. Save model in ```result/meta-rte-roberta-large ```. 
 ```
 TEST_TASK=rte
 MODEL=roberta-large
 SEED=42
 NUM_BATCH=1000
+
+mkdir result/meta-$TEST_TASK-$MODEL
 
 CUDA_VISIBLE_DEVICES=1  \
 python metaTrain.py \
@@ -79,18 +107,57 @@ python metaTrain.py \
     --overwrite_output_dir \
     --do_train \
     --save_at_last \
+    2>&1 | tee "result/meta-$TEST_TASK-$MODEL/${TEST_TASK}_stderr_stdout.txt"
+```
+* Save above to `train_meta.sh`, we can for loop tasks:
+```
+for test_task in cr mr mpqa subj mnli snli cola sst-5
+do 
+    echo $test_task
+    CUDA_VISIBLE_DEVICES=1 \
+    TEST_TASK=$test_task \
+    bash train_meta.sh
+done
 ```
 
-* zero-shot evaluation on
-   - Original backbone (replicates paper's result): ```MODEL=roberta-large```
-   - Multi-tasks trained backbone: ```MODEL=result/meta-rte-roberta-large```
-```
-CUDA_VISIBLE_DEVICES=0 TAG=exp TYPE=prompt TASK=RTE BS=2 LR=1e-5 SEED=42  MODEL=result/meta-rte-roberta-large bash run_experiment.sh "--no_train"
-```
-
-* Prompt-finetune + evaluation
+#### Prompt-finetune + evaluation
+* Prompt-finetune + evaluation single seed
   - Original backbone (replicates paper's result): ```MODEL=roberta-large```
   - Multi-tasks trained backbone: ```MODEL=result/meta-rte-roberta-large```
 ```
 CUDA_VISIBLE_DEVICES=0 TAG=exp TYPE=prompt TASK=RTE BS=2 LR=1e-5 SEED=42  MODEL=result/meta-rte-roberta-large bash run_experiment.sh 
+```
+* Across 5 seeds:
+```
+test_task=CoLA
+for seed in 13 21 42 87 100
+do  
+    CUDA_VISIBLE_DEVICES=0 \
+    TAG="meta-${test_task,,}" \
+    TYPE=prompt \
+    TASK=$test_task \
+    BS=2 \
+    LR=1e-5 \
+    SEED=$seed \
+    MODEL="roberta-large" \
+    bash run_experiment.sh
+done
+```
+* Across 5 seeds for loop tasks:
+```
+for test_task in mpqa subj MNLI SNLI CoLA sst-5
+do
+    for seed in 13 21 42 87 100
+    do  
+        CUDA_VISIBLE_DEVICES=0 \
+        TAG="base-${test_task,,}" \
+        TYPE=prompt \
+        TASK=$test_task \
+        BS=2 \
+        LR=1e-5 \
+        SEED=$seed \
+        MODEL=roberta-large \
+        bash run_experiment.sh
+    done
+done
 ```
