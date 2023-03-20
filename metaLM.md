@@ -156,7 +156,7 @@ do
         BS=2 \
         LR=1e-5 \
         SEED=$seed \
-        MODEL=roberta-large \
+        MODEL="result/meta-${test_task,,}-roberta-large" \
         bash run_experiment.sh
     done
 done
