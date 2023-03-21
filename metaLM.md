@@ -30,7 +30,7 @@ The accuracy for each epoch is averaged cross all batches.
 <!-- 100,10 for testing -->
 BackBone: **RoBERTa-large**
 - [paper's result](https://arxiv.org/pdf/2012.15723.pdf) in parenthesis
-- number with \*: meta train for 10000 steps, others 1000 steps
+- number with \*: Multi-task FT for 10000 steps, others 1000 steps
 - __hightlight__ results where Multi-task FT does not help
 
 |test dataset |Prompt-based zero-shot|Multi-task FT + zero-shot|Prompt-based FT|Multi-task FT + PB-FT|
