@@ -29,7 +29,10 @@ The accuracy for each epoch is averaged cross all batches.
 ### Result
 <!-- 100,10 for testing -->
 BackBone: **RoBERTa-large**
-([paper's result](https://arxiv.org/pdf/2012.15723.pdf) in parenthesis) (\*: meta train for 10000 steps, others 1000 steps)
+- [paper's result](https://arxiv.org/pdf/2012.15723.pdf) in parenthesis
+- number with \*: meta train for 10000 steps, others 1000 steps
+- __hightlight__ results where Multi-task FT does not help
+
 |test dataset |Prompt-based zero-shot|Multi-task FT + zero-shot|Prompt-based FT|Multi-task FT + PB-FT|
 |-------------|----------------------|-------------------------|---------------|--------|
 |SST-2 (Acc)  |83.60(83.6) |92.89    | 92.6 +- 1.2 (92.7 +- 0.9) | 92.8 +- 0.7 |
