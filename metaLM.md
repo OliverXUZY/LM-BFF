@@ -15,7 +15,7 @@ For testing on certain dataset (say qnli), we use all other 13 datasets as train
         - Forward mini-batch (10 samples) into Masked LM.
         - Prompt-based finetuning: Compute loss on the masked token, backward gradient. 
 
-The evaluation is predicting the masked token. We do not learn linear head here. There are in total $n\\_epoch \times n\\_batch$ optimization steps.
+The evaluation is predicting the masked token. We do not learn linear head here. There are in total $n\\_epoch \times n\\_batch$(in this case 1000) optimization steps.
 Optimization details:
 
 __epoch 1 to 10:__
