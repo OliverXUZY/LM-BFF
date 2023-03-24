@@ -240,7 +240,7 @@ def tokenize_multipart_input(
             token_type_ids = token_type_ids[:max_length]
 
     # Find mask token
-    if prompt:
+    if prompt and "mask" in template:
         mask_pos = [input_ids.index(tokenizer.mask_token_id)]
         # Make sure that the masked position is inside the max_length
         assert mask_pos[0] < max_length
@@ -250,7 +250,7 @@ def tokenize_multipart_input(
         # Only provide token type ids for BERT
         result['token_type_ids'] = token_type_ids
 
-    if prompt:
+    if prompt and "mask" in template:
         result['mask_pos'] = mask_pos
 
     return result
