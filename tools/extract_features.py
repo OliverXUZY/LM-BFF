@@ -11,6 +11,7 @@ from torch.utils.data import Dataset, DataLoader
 
 from transformers import AutoConfig, AutoModelForSequenceClassification, AutoTokenizer, EvalPrediction
 from transformers import HfArgumentParser, TrainingArguments, set_seed
+from transformers.models.bert.modeling_bert import BertPreTrainedModel, BertForSequenceClassification, BertModel
 from transformers.models.roberta.modeling_roberta import RobertaForSequenceClassification, RobertaModel, RobertaLMHead, RobertaClassificationHead
 from transformers.data.data_collator import DataCollator, DataCollatorWithPadding, default_data_collator
 
@@ -35,6 +36,16 @@ datasets = ['CoLA',
  'subj']
 
 seed_shot = ['16-13', '16-100', '16-21', '16-87', '16-42']
+
+@dataclass
+class ModelArguments:
+    """
+    Arguments pertaining to which model/config/tokenizer we are going to fine-tune from.
+    """
+    model_name_or_path: str = field(
+        default="bert-large-uncased",
+        metadata={"help": "Path to pretrained model or model identifier from huggingface.co/models"}
+    )
 
 @dataclass
 class DataArguments:
@@ -140,7 +151,7 @@ def extract(datasets_name, tokenizer, data_args, model):
     
     
     train_dataset = myDataset(train_datas, tokenizer, data_args, dataset.lower())
-    loader = DataLoader(train_dataset, batch_size = 10, collate_fn = default_data_collator) 
+    loader = DataLoader(train_dataset, batch_size = 5, collate_fn = default_data_collator) 
     batch_rep = []
     for batch in loader:
         # batch = next(iter(loader))
@@ -156,28 +167,29 @@ def extract(datasets_name, tokenizer, data_args, model):
 
 
 def main():
-    parser = HfArgumentParser(DataArguments)
-    data_args = parser.parse_args_into_dataclasses()[0]
+    parser = HfArgumentParser((ModelArguments, DataArguments))
+    model_args, data_args = parser.parse_args_into_dataclasses()
 
     # Create tokenizer
     tokenizer = AutoTokenizer.from_pretrained(
-        "roberta-large",
+        model_args.model_name_or_path,
     )
-    model = RobertaModel.from_pretrained("roberta-large")
+    if 'BertTokenizer' in type(tokenizer).__name__:
+        print("bert!")
+        model_fn = BertModel
+    else:
+        print("roberta!")
+        model_fn = RobertaModel
+    model = model_fn.from_pretrained(model_args.model_name_or_path)
     model = model.cuda()
-    for datasets_name in datasets[10:]:
+    for datasets_name in datasets:
         print(datasets_name)
 
         batch_rep = extract(datasets_name, tokenizer, data_args, model)
         print("name: {} | shape of features: {} | type of numpy array: {}".format(
             datasets_name, batch_rep.shape, batch_rep.dtype))
         
-        np.save("result/features/{}-label_info.npy".format(datasets_name), batch_rep)
-
-    
-    
-        
-
+        np.save("result/features/{}-{}-label_info.npy".format(datasets_name, model_args.model_name_or_path), batch_rep)
 
 if __name__ == "__main__":
     main()
