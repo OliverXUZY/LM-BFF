@@ -507,6 +507,17 @@ class Trainer(transformers.Trainer):
 
         eval_dataloader = self.get_eval_dataloader(eval_dataset)
 
+        # ----------------------------------------------------------------------
+        # BEGIN zhuoyan CHANGES. modify label_word_list accordingly everytime evaluate, since each batch task change!!!
+        # ----------------------------------------------------------------------
+        
+        self.model.label_word_list = eval_dataloader.dataset.label_word_list
+        # print("Zhuoyan model.label_word_list: ",self.model.label_word_list)
+        # print("Zhuoyan task_name src.trainer: ", self.eval_dataset.task_name)
+        # ----------------------------------------------------------------------
+        # END zhuoyan CHANGES. modify label_word_list accordingly
+        # ----------------------------------------------------------------------
+
         # output = self.prediction_loop(eval_dataloader, description="Evaluation")
         output = self.evaluation_loop(eval_dataloader, description="Evaluation")
         print("============-------+++++++++++++++++++++++++++++++++++++++++++++++++", output.metrics)
