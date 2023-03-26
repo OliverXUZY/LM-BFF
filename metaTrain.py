@@ -19,7 +19,7 @@ from src.dataset import FewShotDataset
 from src.models import BertForPromptFinetuning, RobertaForPromptFinetuning, resize_token_type_embeddings
 from src.trainer import Trainer
 from src.processors import processors_mapping, num_labels_mapping, output_modes_mapping, compute_metrics_mapping, bound_mapping
-from src.metaDataset import metaDataset
+from src.metaDataset import metaDataset, mapping_dict, data_dir_dict, template_dict
 
 from filelock import FileLock
 from datetime import datetime
@@ -322,6 +322,7 @@ def main():
         model_args, data_args, training_args = parser.parse_args_into_dataclasses()
 
     data_args.template_list = None # not use any pre-loaded template for now
+    data_args.task_name = data_args.task_name.lower()
 
     if 'prompt' in model_args.few_shot_type:
         data_args.prompt = True
@@ -333,6 +334,7 @@ def main():
         level=logging.INFO if training_args.local_rank in [-1, 0] else logging.WARN,
     )
     print("++zhuoyan+: num_train_epochs",training_args.num_train_epochs)
+    print("++zhuoyan+: test task", data_args.task_name)
 
     # Check save path
     if (
@@ -385,6 +387,12 @@ def main():
     train_dataset = (
         metaDataset(data_args, tokenizer=tokenizer, use_demo=("demo" in model_args.few_shot_type))
     )
+    
+    # pass additional data_args `FewShotDataset` needed
+    data_args.mapping = mapping_dict[data_args.task_name]
+    direc = data_dir_dict.get(data_args.task_name) or data_args.task_name
+    data_args.data_dir = "data/k-shot/{}/16-{}".format(direc, data_args.few_shot_data_seed)
+    data_args.template = template_dict[data_args.task_name]
     eval_dataset = (
         FewShotDataset(data_args, tokenizer=tokenizer, mode="dev", use_demo=("demo" in model_args.few_shot_type))
         if training_args.do_eval
