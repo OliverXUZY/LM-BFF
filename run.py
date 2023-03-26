@@ -646,7 +646,7 @@ def main():
             test_results.update(test_result)
 
     with FileLock('log.lock'):
-        with open('log', 'a') as f:
+        with open('log_res', 'a') as f:
             final_result.update(vars(model_args))
             final_result.update(vars(training_args))
             final_result.update(vars(data_args))
