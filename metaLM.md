@@ -44,7 +44,7 @@ BackBone: **RoBERTa-large**
 |CR (Acc)     |79.5(79.5)  |88.8     | 91.4 +- 0.9 (90.3 +- 1.0) |91.6 +-0.9 \~|
 |MR (Acc)     |80.8(80.8   |86.5     | 86.9 +- 1.7 (87.0 +- 1.2) | 87.8 +-1.4 \*|
 |MPQA (Acc)   |67.6(61.6)  |73.9     |84.8 +- 1.6 (84.7 +- 2.2)  |__83.0 +- 1.9__ \*|
-|Subj (Acc)   |51.45(51.4) |55.3     |88.8 +- 2.5 (91.2 +- 1.1)  |__88.5 +-2.8__ |
+|Subj (Acc)   |51.45(51.4) |55.3     |88.8 +- 2.5 (91.2 +- 1.1)  |90.3 +- 2.1 |
 |MNLI (Acc)   |50.84(50.8) |63.2     |68.2 +-2.7 (68.3 +- 2.3)   |71.4 +- 1.3 |
 |MNLI-mm (Acc)|51.72(51.7) |65.7     |70.2 +-2.6 (70.5 +- 1.9)   |74.0 +- 1.5 |
 |SNLI (Acc)   |49.51(49.5) |61.8     |75.1 +-4.2 (77.2 +- 3.7)   |78.0 +- 3.8 |
@@ -53,6 +53,7 @@ BackBone: **RoBERTa-large**
 
 Customized:
 ~: train dataset for `cr`: `['cola','mr', 'subj','sst-2',  'sst-5']`, 2000 steps
+~: train dataset for `subj`: `['cola','mr', 'cr','sst-2',  'sst-5']`, 2000 steps
 
 ### Examples
 Please install the requirements and download data following `README.md`. This result used transformers version `4.26.1`(or stable version). The reason we use new version instead of `3.4.0` in paper is old version requires python 3.4 and invoke many decrecated functions and classes, this will produce many warnings. It would easier to debug also.
