@@ -30,7 +30,7 @@ The accuracy for each epoch is averaged cross all batches.
 <!-- 100,10 for testing -->
 BackBone: **RoBERTa-large**
 - [paper's result](https://arxiv.org/pdf/2012.15723.pdf) in parenthesis
-- number with \*: Multi-task FT for 10000 steps, others 1000 steps
+- Number with \*: Multi-task FT for 10000 steps, others 1000 steps. Number with \~, customized train dataset.
 - __hightlight__ results where Multi-task FT does not help
 
 |test dataset |Prompt-based zero-shot|Multi-task FT + zero-shot|Prompt-based FT|Multi-task FT + PB-FT|
@@ -41,7 +41,7 @@ BackBone: **RoBERTa-large**
 |QNLI (Acc)   |50.81(50.8) |65.84    | 69.4 +- 3.6 (64.5 +- 4.2) | 71.9 +- 1.6 |
 |QQP (F1)     |32.0(32.0)  |63.43    |66.2 +- 4.9 (65.5 +- 5.3)  |  68.7 +- 3.4 |
 |TREC (Acc)   |47.72(49.7) |__34.6__   | 86.0 +- 3.0 (84.8 +- 5.1) | __83.0 +- 4.1__ |
-|CR (Acc)     |79.5(79.5)  |88.8     | 91.4 +- 0.9 (90.3 +- 1.0) |__90.5 +- 1.0__ \*|
+|CR (Acc)     |79.5(79.5)  |88.8     | 91.4 +- 0.9 (90.3 +- 1.0) |91.6 +-0.9 \~|
 |MR (Acc)     |80.8(80.8   |86.5     | 86.9 +- 1.7 (87.0 +- 1.2) | 87.8 +-1.4 \*|
 |MPQA (Acc)   |67.6(61.6)  |73.9     |84.8 +- 1.6 (84.7 +- 2.2)  |__83.0 +- 1.9__ \*|
 |Subj (Acc)   |51.45(51.4) |55.3     |88.8 +- 2.5 (91.2 +- 1.1)  |__88.5 +-2.8__ |
@@ -51,6 +51,8 @@ BackBone: **RoBERTa-large**
 |CoLA (Matt.) |2.03(2.0)   |__-0.065__ |8.6 +-5.8 (9.3 +- 7.3)   |__5.5 +- 3.8__ |
 |SST-5 (Acc)  |35.0(35.0)  |36.8     |48.1 +-1.6 (47.4 +- 2.5)   |49.5 +- 0.9 |
 
+Customized:
+~: train dataset for `cr`: `['cola','mr', 'subj','sst-2',  'sst-5']`, 4000 steps
 
 ### Examples
 Please install the requirements and download data following `README.md`. This result used transformers version `4.26.1`(or stable version). The reason we use new version instead of `3.4.0` in paper is old version requires python 3.4 and invoke many decrecated functions and classes, this will produce many warnings. It would easier to debug also.
