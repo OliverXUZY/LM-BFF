@@ -60,7 +60,7 @@ Summary:
   - `RTE, MRPC, QNLI, QQP, MR, MNLI, MNLI-mm, SNLI, SST-5`
 - MT-FT does not help a lot:
   - `SST-2, CR, Subj`
-MT-FT worsen the result:
+- MT-FT worsen the result:
   - `TREC, MPQA, CoLA`
 
 ### Examples
