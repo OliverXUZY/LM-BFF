@@ -51,9 +51,9 @@ BackBone: **RoBERTa-large**
 |CoLA (Matt.) |2.03(2.0)   |__-0.065__ |8.6 +-5.8 (9.3 +- 7.3)   |__5.5 +- 3.8__ |
 |SST-5 (Acc)  |35.0(35.0)  |36.8     |48.1 +-1.6 (47.4 +- 2.5)   |49.5 +- 0.9 |
 
-Customized:
-~: train dataset for `cr`: `['cola','mr', 'subj','sst-2',  'sst-5']`, 2000 steps
-~: train dataset for `subj`: `['cola','mr', 'cr','sst-2',  'sst-5']`, 2000 steps
+Customized ~:
+- train dataset for `cr`: `['cola','mr', 'subj','sst-2',  'sst-5']`, 2000 steps
+- train dataset for `subj`: `['cola','mr', 'cr','sst-2',  'sst-5']`, 2000 steps
 
 ### Examples
 Please install the requirements and download data following `README.md`. This result used transformers version `4.26.1`(or stable version). The reason we use new version instead of `3.4.0` in paper is old version requires python 3.4 and invoke many decrecated functions and classes, this will produce many warnings. It would easier to debug also.
