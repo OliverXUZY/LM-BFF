@@ -32,8 +32,13 @@ from .dataset import (
 
 logger = logging.getLogger(__name__)
 
-full_task_names = ['cola', 'mrpc', 'qqp', 'snli', 'sts-b', 'cr', 'mr', 'subj',
-                       'mnli', 'qnli', 'rte', 'sst-2', 'mpqa', 'sst-5', 'trec']
+# full_task_names = ['cola', 'mrpc', 'qqp', 'snli', 'sts-b', 'cr', 'mr', 'subj',
+#                        'mnli', 'qnli', 'rte', 'sst-2', 'mpqa', 'sst-5', 'trec']
+
+# full_task_names = ['cola',  'cr', 'mr', 'subj',
+#                         'sst-2',  'sst-5']
+
+full_task_names = ['trec',  'mpqa']
 
 template_dict = {
     'cola': '*cls**sent_0*_This_is*mask*.*sep+*',
@@ -107,7 +112,8 @@ class metaDataset(torch.utils.data.Dataset):
     def __init__(self, args, tokenizer, cache_dir=None, use_demo=False):
         self.args = args
         test_task = args.task_name
-        self.task_names = [name for name in full_task_names if name != test_task and name != 'sts-b']
+        self.task_names = [name for name in full_task_names if name != test_task and name not in ['sts-b']]
+        print("zhuoyan: train datasets: ", self.task_names)
         self.tokenizer = tokenizer
         self.datasets = {}
         self.use_demo = use_demo

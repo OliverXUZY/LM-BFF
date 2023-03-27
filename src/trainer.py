@@ -247,6 +247,11 @@ class Trainer(transformers.Trainer):
 
         # Data loading.
         train_dataloader = self.get_train_dataloader()
+
+        ## zhuoyan:
+        # batch = next(iter(train_dataloader))
+        # print('=============== batch_keys: ', batch.keys())
+        ##
         num_update_steps_per_epoch = len(train_dataloader) // self.args.gradient_accumulation_steps 
         if num_update_steps_per_epoch == 0:
             num_update_steps_per_epoch = 1
@@ -357,6 +362,10 @@ class Trainer(transformers.Trainer):
                 self._past = None
 
             for step, inputs in enumerate(epoch_iterator):
+                # print("inputs_keys===", inputs.keys())
+                # print(inputs['task_id'])
+                # if inputs.get('task_id'):
+                #     print("get it!")
 
                 # Skip past any already trained steps if resuming training
                 if steps_trained_in_current_epoch > 0:
@@ -366,9 +375,11 @@ class Trainer(transformers.Trainer):
                 # ----------------------------------------------------------------------
                 # BEGIN zhuoyan CHANGES. modify label_word_list accordingly
                 # ----------------------------------------------------------------------
-                if inputs.get('task_id'): ## got batch from metaDataset:
+                ## if inputs.get('task_id')==torch.tensor([0]), this will not return True in  if `inputs.get('task_id')`!!!
+                if inputs.get('task_id') is not None: ## got batch from metaDataset:
                     task_id_to_name = list(task_name_to_id.keys())
                     task_name = task_id_to_name[inputs['task_id'].item()]
+                    # print("zhuoyan task_name===", task_name)
                     model.label_word_list = train_dataloader.dataset.datasets[task_name]['label_word_list']
                 # ----------------------------------------------------------------------
                 # END zhuoyan CHANGES. modify label_word_list accordingly

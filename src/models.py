@@ -170,6 +170,7 @@ class RobertaForPromptFinetuning(BertPreTrainedModel):
 
         # Return logits for each label
         logits = []
+        # print("zhuoyan ==== ", self.label_word_list)
         for label_id in range(len(self.label_word_list)):
             logits.append(prediction_mask_scores[:, self.label_word_list[label_id]].unsqueeze(-1))
         logits = torch.cat(logits, -1)
