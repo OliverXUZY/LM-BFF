@@ -1,11 +1,11 @@
 # Multi-task finetuning
 
 ### Datasets
-GLUE like datasets, we use the same dataset, excluding the STS-B (regression dataset): 
-- train dataset: cola, sst2, qqp, mnli, qnli, rte, snli, 
-            trec, mpqa, cr, sst5, mr, subj, mrpc. The datasets contains binary classes or multi-classes.
+GLUE like datasets, we use the same dataset, excluding the `STS-B` (regression dataset): 
+- train dataset: `cola, sst2, qqp, mnli, qnli, rte, snli, 
+            trec, mpqa, cr, sst5, mr, subj, mrpc`. The datasets contains binary classes or multi-classes.
 
-For testing on certain dataset (say qnli), we use all other 13 datasets as training data for multi-tasks finetuning.
+For testing on certain dataset (say `qnli`), we use all other 13 datasets as training data for multi-tasks finetuning.
 
 ### Algorithms:
 1. Sub-sample $K=16$ samples per class from each datasets. Form subdatasets.
@@ -26,20 +26,27 @@ lr decay: linear decay to 0 during 1000 steps
 ```
 The accuracy for each epoch is averaged cross all batches.
 
-### Result
-<!-- 100,10 for testing -->
+## Result
+<!-- 1000,100 for testing -->
+### Visualization
+We are considering visualize the distance between each of two datasets, so may be find a way to interpret why multi-task FT works on some datasets and not on others. We forward text examples through BERT backbone and get text features of each data in dataset (the reason for using BERT over RoBERTa is the latter only have masked token prediction in pre-training, the [CLS] in pre-trained RoBERTa model might not contain as much info as BERT.). We compute first principle component and get one feature vector per dataset. The distance heatmap are shown below.
+
+<img src="https://user-images.githubusercontent.com/43462304/228123703-98d4b876-2bb8-4400-89c2-dff06fe933da.png" width=50% height=50%>
+
+We can observe `trec, mpqa` are closed, `cola,mr, cr,sst-2,sst-5,subj` are closed. These provide some ideas for choosing finetuning datasets
+### Accuracy
 BackBone: **RoBERTa-large**
 - [paper's result](https://arxiv.org/pdf/2012.15723.pdf) in parenthesis
-- Number with \*: Multi-task FT for 10000 steps, others 1000 steps. Number with \~, customized train dataset.
+- Number with \*: Multi-task FT for 10000 steps, others 1000 steps. Number with \~, Multi-task FT with customized setting (see points below the table).
 - __hightlight__ results where Multi-task FT worsening the results.
 
 Summary of results of `Prompt-based FT` vs `Multi-task FT + PB-FT`:
 - MT-FT provide improvements:
-  - `RTE, MRPC, QNLI, QQP, MR, MNLI, MNLI-mm, SNLI, SST-5`
+  - `RTE, MRPC, QNLI, QQP, TREC, MR, MNLI, MNLI-mm, SNLI, SST-5`
 - MT-FT does not help a lot:
-  - `SST-2, CR, Subj`
+  - `SST-2, CR, MPQA, Subj`
 - MT-FT worsen the result:
-  - `TREC, MPQA, CoLA`
+  - `CoLA`
 
 |test dataset |Prompt-based zero-shot|Multi-task FT + zero-shot|Prompt-based FT|Multi-task FT + PB-FT|
 |-------------|----------------------|-------------------------|---------------|--------|
@@ -63,9 +70,9 @@ Customized training datasets ~:
 - train dataset for `cr`: `['mr', 'subj','sst-2',  'sst-5']`, 2000 steps
 - train dataset for `subj`: `['cola','mr', 'cr','sst-2',  'sst-5']`, 2000 steps
 - train dataset for `trec`: `['mpqa']`, 2000 steps
-- - train dataset for `mpqa`: `['trec']`, 2000 steps
+- train dataset for `mpqa`: `['trec']`, 2000 steps
 
-### Examples
+## Examples
 Please install the requirements and download data following `README.md`. This result used transformers version `4.26.1`(or stable version). The reason we use new version instead of `3.4.0` in paper is old version requires python 3.4 and invoke many decrecated functions and classes, this will produce many warnings. It would easier to debug also.
 
 The current running performs prompt-based finetuning without demonstration.
