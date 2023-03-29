@@ -32,13 +32,13 @@ from .dataset import (
 
 logger = logging.getLogger(__name__)
 
-# full_task_names = ['cola', 'mrpc', 'qqp', 'snli', 'sts-b', 'cr', 'mr', 'subj',
-#                        'mnli', 'qnli', 'rte', 'sst-2', 'mpqa', 'sst-5', 'trec']
+full_task_names = ['cola', 'mrpc', 'qqp', 'snli', 'sts-b', 'cr', 'mr', 'subj',
+                       'mnli', 'qnli', 'rte', 'sst-2', 'mpqa', 'sst-5', 'trec']
 
 # full_task_names = ['cola',  'cr', 'mr', 'subj',
 #                         'sst-2',  'sst-5']
 
-full_task_names = ['trec',  'mpqa']
+# full_task_names = ['trec',  'mpqa']
 
 template_dict = {
     'cola': '*cls**sent_0*_This_is*mask*.*sep+*',
@@ -317,7 +317,7 @@ class metaDataset(torch.utils.data.Dataset):
         """
         Returns a list of processed "InputFeatures".
         """
-        max_length = self.extra_args['max_seq_length']    
+        max_length = self.extra_args.get('max_seq_length') or self.args.max_seq_length
 
         # Prepare labels
         label_map = {label: i for i, label in enumerate(label_list)} # Mapping the label names to label ids
@@ -344,8 +344,8 @@ class metaDataset(torch.utils.data.Dataset):
             prompt=prompt,
             template=template,
             label_word_list=label_word_list,
-            first_sent_limit=self.extra_args['first_sent_limit'],
-            other_sent_limit=self.extra_args['other_sent_limit'],
+            first_sent_limit=self.extra_args.get('first_sent_limit') or None,
+            other_sent_limit=self.extra_args.get('other_sent_limit') or None,
             truncate_head=self.args.truncate_head,
         )
 
