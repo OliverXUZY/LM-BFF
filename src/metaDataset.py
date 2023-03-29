@@ -118,6 +118,8 @@ class metaDataset(torch.utils.data.Dataset):
         self.datasets = {}
         self.use_demo = use_demo
 
+        self.seed = 0 ## for determinitic random in getitem()
+
         # Multiple sampling: when using demonstrations, we sample different combinations of demonstrations during 
         # inference and aggregate the results by averaging the logits. The number of different samples is num_sample.
         mode = "train"
@@ -211,22 +213,39 @@ class metaDataset(torch.utils.data.Dataset):
         return self.args.num_batch # not make a difference
     
     def __getitem__(self, i):
+        np.random.seed(self.seed)
+        self.seed += 1
         ### random dataset ###
         task_name = random.sample(self.task_names, 1)[0]
         # task_name = 'sst-2'
         # for task_name in self.task_names:
-        if task_name in ["qqp", "mnli", 'snli']:
-            self.args.num_sample = 4
+
+        # if task_name in ["qqp", "mnli", 'snli']:
+        #     self.args.num_sample = 4
+        # if task_name in ["mnli", 'snli', 'rte']:
+        #     self.args.max_seq_length = 256
+        # if task_name in ['rte']:
+        #     self.args.first_sent_limit = 240
+        # if task_name in ['mr', 'sst-5', 'subj', 'trec', 'cr', 'mpqa']:
+        #     self.args.first_sent_limit = 110
+        # if task_name in ['mr', 'subj', 'cr']:
+        #     self.args.other_sent_limit = 50
+        # if task_name in ['sst-5']:
+        #     self.args.other_sent_limit = 20
+        
+        # add extra arguments
+        extra_args = {}
         if task_name in ["mnli", 'snli', 'rte']:
-            self.args.max_seq_length = 256
+            extra_args['max_seq_length'] = 256
         if task_name in ['rte']:
-            self.args.first_sent_limit = 240
+            extra_args['first_sent_limit'] = 240
         if task_name in ['mr', 'sst-5', 'subj', 'trec', 'cr', 'mpqa']:
-            self.args.first_sent_limit = 110
+            extra_args['first_sent_limit'] = 110
         if task_name in ['mr', 'subj', 'cr']:
-            self.args.other_sent_limit = 50
+            extra_args['other_sent_limit'] = 50
         if task_name in ['sst-5']:
-            self.args.other_sent_limit = 20
+            extra_args['other_sent_limit'] = 20
+        self.extra_args = extra_args
        
         dataset = self.datasets[task_name]
         
@@ -298,7 +317,7 @@ class metaDataset(torch.utils.data.Dataset):
         """
         Returns a list of processed "InputFeatures".
         """
-        max_length = self.args.max_seq_length    
+        max_length = self.extra_args['max_seq_length']    
 
         # Prepare labels
         label_map = {label: i for i, label in enumerate(label_list)} # Mapping the label names to label ids
@@ -325,8 +344,8 @@ class metaDataset(torch.utils.data.Dataset):
             prompt=prompt,
             template=template,
             label_word_list=label_word_list,
-            first_sent_limit=self.args.first_sent_limit,
-            other_sent_limit=self.args.other_sent_limit,
+            first_sent_limit=self.extra_args['first_sent_limit'],
+            other_sent_limit=self.extra_args['other_sent_limit'],
             truncate_head=self.args.truncate_head,
         )
 
@@ -342,7 +361,19 @@ class metaDataset(torch.utils.data.Dataset):
 
         return features
 
-    
+class testDataset(torch.utils.data.Dataset):  
+    def __init__(self) -> None:
+        super().__init__()
+        self.seed = 0
+    def __len__(self):
+        return 10
+    def __getitem__(self,index):
+        print(self.seed)
+        np.random.seed(self.seed)
+        self.seed += 1
+        a = ["a","b","c","d","e"]
+        b = [i for i in range(10)]
+        return np.random.choice(a,1)[0], np.random.choice(b,2)
 
 
 

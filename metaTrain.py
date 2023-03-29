@@ -393,6 +393,21 @@ def main():
     direc = data_dir_dict.get(data_args.task_name) or data_args.task_name
     data_args.data_dir = "data/k-shot/{}/16-{}".format(direc, data_args.few_shot_data_seed)
     data_args.template = template_dict[data_args.task_name]
+
+    task_name = data_args.task_name
+    # add TASK_EXTRA
+    if task_name in ["qqp", "mnli", 'snli']:
+        data_args.num_sample = 4
+    if task_name in ["mnli", 'snli', 'rte']:
+        data_args.max_seq_length = 256
+    if task_name in ['rte']:
+        data_args.first_sent_limit = 240
+    if task_name in ['mr', 'sst-5', 'subj', 'trec', 'cr', 'mpqa']:
+        data_args.first_sent_limit = 110
+    if task_name in ['mr', 'subj', 'cr']:
+        data_args.other_sent_limit = 50
+    if task_name in ['sst-5']:
+        data_args.other_sent_limit = 20
     eval_dataset = (
         FewShotDataset(data_args, tokenizer=tokenizer, mode="dev", use_demo=("demo" in model_args.few_shot_type))
         if training_args.do_eval
