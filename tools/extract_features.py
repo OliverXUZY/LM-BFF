@@ -2,7 +2,7 @@ import dataclasses
 import logging
 import os
 import sys
-sys.path.append("/home/zhuoyan/LM-BFF")
+sys.path.append("/srv/home/zxu444/LM-BFF")
 from dataclasses import dataclass, field
 from typing import Callable, Dict, Optional
 import numpy as np

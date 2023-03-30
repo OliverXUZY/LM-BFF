@@ -40,6 +40,24 @@ full_task_names = ['cola', 'mrpc', 'qqp', 'snli', 'sts-b', 'cr', 'mr', 'subj',
 
 # full_task_names = ['trec',  'mpqa']
 
+train_task_names_dict = {
+    'cola': ['cola','mr', 'cr','sst-2','sst-5','subj'],
+    'sst-2': ['cola','mr', 'cr','sst-2','sst-5','subj'],
+    'mrpc': ['mrpc', 'qnli', 'rte'],
+    'qqp': ['snli', 'qqp', 'mnli'],
+    # 'sts-b': '*cls**sent_0**mask*,*+sentl_1**sep+*',
+    'mnli': ['snli', 'qqp', 'mnli'],
+    'snli': ['snli', 'qqp', 'mnli'],
+    'qnli': ['mrpc', 'qnli', 'rte'],
+    'rte': ['mrpc', 'qnli', 'rte'],
+    'mr': ['cola','mr', 'cr','sst-2','sst-5','subj'],
+    'sst-5': ['cola','mr', 'cr','sst-2','sst-5','subj'],
+    'subj': ['cola','mr', 'cr','sst-2','sst-5','subj'],
+    'trec': ['trec', 'mpqa'],
+    'cr': ['cola','mr', 'cr','sst-2','sst-5','subj'],
+    'mpqa':  ['trec', 'mpqa'],
+}
+
 template_dict = {
     'cola': '*cls**sent_0*_This_is*mask*.*sep+*',
     'sst-2': '*cls**sent_0*_It_was*mask*.*sep+*',
@@ -112,7 +130,9 @@ class metaDataset(torch.utils.data.Dataset):
     def __init__(self, args, tokenizer, cache_dir=None, use_demo=False):
         self.args = args
         test_task = args.task_name
-        self.task_names = [name for name in full_task_names if name != test_task and name not in ['sts-b']]
+        # task_names_set = full_task_names
+        task_names_set = train_task_names_dict[test_task]
+        self.task_names = [name for name in task_names_set if name != test_task and name not in ['sts-b']]
         print("zhuoyan: train datasets: ", self.task_names)
         self.tokenizer = tokenizer
         self.datasets = {}

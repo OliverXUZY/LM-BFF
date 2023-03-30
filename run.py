@@ -62,6 +62,12 @@ class ModelArguments:
         metadata={"help": "Whether to reinitialize the token type embeddings (only for BERT)."}
     )
 
+    log: str= field(
+        default='log_res',
+        metadata={"help": "Log path"}
+    )
+
+
 @dataclass
 class DynamicDataTrainingArguments(DataTrainingArguments):
     """
@@ -646,7 +652,7 @@ def main():
             test_results.update(test_result)
 
     with FileLock('log.lock'):
-        with open('log_res', 'a') as f:
+        with open(model_args.log, 'a') as f:
             final_result.update(vars(model_args))
             final_result.update(vars(training_args))
             final_result.update(vars(data_args))
