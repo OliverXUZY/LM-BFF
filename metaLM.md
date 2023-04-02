@@ -64,7 +64,7 @@ Summary of results of `Prompt-based FT` vs `Multi-task FT + PB-FT`:
 |MNLI-mm (Acc)|51.72(51.7) |65.7     |70.2 +-2.6 (70.5 +- 1.9)   |74.0 +- 1.5 |
 |SNLI (Acc)   |49.51(49.5) |61.8     |75.1 +-4.2 (77.2 +- 3.7)   |78.0 +- 3.8 |
 |CoLA (Matt.) |2.03(2.0)   |__-0.065__ |8.6 +-5.8 (9.3 +- 7.3)   |__5.5 +- 3.8__ |
-|SST-5 (Acc)  |35.0(35.0)  |36.8     |48.1 +-1.6 (47.4 +- 2.5)   |49.5 +- 0.9* |
+|SST-5 (Acc)  |35.0(35.0)  |37.2     |48.1 +-1.6 (47.4 +- 2.5)   |49.5 +- 0.9* |
 
 Customized training datasets ~:
 - train dataset for `cr`: `['mr', 'subj','sst-2',  'sst-5']`, 2000 steps
