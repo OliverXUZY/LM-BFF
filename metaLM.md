@@ -72,6 +72,27 @@ Customized training datasets ~:
 - train dataset for `trec`: `['mpqa']`, 2000 steps
 - train dataset for `mpqa`: `['trec']`, 2000 steps
 
+### Ablation study
+<img width="1146" alt="image" src="https://user-images.githubusercontent.com/43462304/229681145-4ee37ce1-c916-4a6c-93c0-c622805f82df.png">
+dataset selection:
+
+```
+'cola': ['cola','mr', 'cr','sst-2','sst-5','subj']
+'sst-2': ['cola','mr', 'cr','sst-2','sst-5','subj']
+'mrpc': ['mrpc', 'qnli', 'rte']
+'qqp': ['snli', 'qqp', 'mnli']
+'mnli': ['snli', 'qqp', 'mnli']
+'snli': ['snli', 'qqp', 'mnli']
+'qnli': ['mrpc', 'qnli', 'rte']
+'rte': ['mrpc', 'qnli', 'rte']
+'mr': ['cola','mr', 'cr','sst-2','sst-5','subj']
+'sst-5': ['cola','mr', 'cr','sst-2','sst-5','subj']
+'subj': ['cola','mr', 'cr','sst-2','sst-5','subj']
+'trec': ['trec', 'mpqa']
+'cr': ['cola','mr', 'cr','sst-2','sst-5','subj']
+'mpqa':  ['trec', 'mpqa']
+```
+
 ## Examples
 Please install the requirements and download data following `README.md`. This result used transformers version `4.26.1`(or stable version). The reason we use new version instead of `3.4.0` in paper is old version requires python 3.4 and invoke many decrecated functions and classes, this will produce many warnings. It would easier to debug also.
 
