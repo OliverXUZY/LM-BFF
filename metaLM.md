@@ -73,7 +73,8 @@ Customized training datasets ~:
 - train dataset for `mpqa`: `['trec']`, 2000 steps
 
 ### Ablation study
-<img width="1146" alt="image" src="https://user-images.githubusercontent.com/43462304/229681145-4ee37ce1-c916-4a6c-93c0-c622805f82df.png">
+<img width="1478" alt="image" src="https://user-images.githubusercontent.com/43462304/229682241-c2794ec3-5306-4638-b117-128ad5abc151.png">
+
 dataset selection:
 
 ```
